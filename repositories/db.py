@@ -1,4 +1,5 @@
 import asyncpg
+import urllib.parse
 from config import DATABASE_URL
 
 _pool = None
@@ -9,8 +10,14 @@ async def init_pool():
     if not DATABASE_URL:
         raise RuntimeError("DATABASE_URL environment variable is not set.")
     try:
+        parsed = urllib.parse.urlparse(DATABASE_URL)
+        print(f"[DB] Connecting to host={parsed.hostname} port={parsed.port} user={parsed.username}")
         _pool = await asyncpg.create_pool(
-            DATABASE_URL,
+            host=parsed.hostname,
+            port=parsed.port or 5432,
+            user=urllib.parse.unquote(parsed.username),
+            password=urllib.parse.unquote(parsed.password),
+            database=parsed.path.lstrip("/"),
             ssl="require",
             statement_cache_size=0,
         )
