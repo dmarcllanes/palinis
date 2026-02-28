@@ -53,7 +53,8 @@ def marketing_page():
                         A('How It Works', href='#how-it-works'),
                         A('Services', href='#services'),
                         A('Get Quote', href='#quote'),
-                        A('Book Now', href='#contact', cls='cta-link'),
+                        A('Track Booking', href='/booking/lookup'),
+                        A('Book Now', href='/book', cls='cta-link'),
                         cls='nav-links',
                         id='nav-links',
                     ),
@@ -71,7 +72,7 @@ def marketing_page():
                         P('Trusted, police-checked cleaners. Instant online booking. No lock-in contracts.', cls='hero-subtitle'),
                         Div(
                             Button('Get Instant Quote', onclick="document.getElementById('quote').scrollIntoView({behavior:'smooth'})", cls='btn btn-primary'),
-                            Button('Book Now', onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})", cls='btn btn-secondary'),
+                            Button('Book Now', onclick="window.location.href='/book'", cls='btn btn-secondary'),
                             cls='hero-buttons',
                         ),
                         Div(
@@ -137,7 +138,7 @@ def marketing_page():
                                 H3('Regular Cleaning'),
                                 P('Perfect for weekly or fortnightly upkeep.'),
                                 Div('From $89', cls='price'),
-                                Button('Book Now', cls='btn btn-outline btn-full'),
+                                Button('Book Now', onclick="window.location.href='/book'", cls='btn btn-outline btn-full'),
                                 cls='service-content'
                             ),
                             cls='service-card'
@@ -148,7 +149,7 @@ def marketing_page():
                                 H3('Deep Cleaning'),
                                 P('For seasonal refresh or detailed reset.'),
                                 Div('From $189', cls='price'),
-                                Button('Book Now', cls='btn btn-outline btn-full'),
+                                Button('Book Now', onclick="window.location.href='/book'", cls='btn btn-outline btn-full'),
                                 cls='service-content'
                             ),
                             cls='service-card'
@@ -159,7 +160,7 @@ def marketing_page():
                                 H3('End of Lease Cleaning'),
                                 P('Bond-back guarantee service for rentals.'),
                                 Div('From $299', cls='price'),
-                                Button('Book Now', cls='btn btn-outline btn-full'),
+                                Button('Book Now', onclick="window.location.href='/book'", cls='btn btn-outline btn-full'),
                                 cls='service-content'
                             ),
                             cls='service-card'
@@ -170,7 +171,7 @@ def marketing_page():
                                 H3('Move-In Cleaning'),
                                 P('Start fresh right in your new home.'),
                                 Div('From $249', cls='price'),
-                                Button('Book Now', cls='btn btn-outline btn-full'),
+                                Button('Book Now', onclick="window.location.href='/book'", cls='btn btn-outline btn-full'),
                                 cls='service-content'
                             ),
                             cls='service-card'
@@ -181,7 +182,7 @@ def marketing_page():
                                 H3('Apartment Cleaning'),
                                 P('Designed for CBD and high-rise living.'),
                                 Div('From $79', cls='price'),
-                                Button('Book Now', cls='btn btn-outline btn-full'),
+                                Button('Book Now', onclick="window.location.href='/book'", cls='btn btn-outline btn-full'),
                                 cls='service-content'
                             ),
                             cls='service-card'
@@ -249,7 +250,7 @@ def marketing_page():
                         Div(
                             Div('Estimated Price', cls='price-label'),
                             Div('$195', id='price-value', cls='price-value'),
-                            Button('Book Now', cls='btn btn-primary btn-full'),
+                            Button('Book Now', onclick="window.location.href='/book'", cls='btn btn-primary btn-full'),
                             cls='price-display',
                         ),
                         cls='calculator',
@@ -398,7 +399,7 @@ def marketing_page():
             Section(
                 Div(
                     H2('Ready for a Cleaner Home?'),
-                    Button('Book Your Cleaning Today', cls='btn btn-primary btn-large'),
+                    Button('Book Your Cleaning Today', onclick="window.location.href='/book'", cls='btn btn-primary btn-large'),
                     P('Instant confirmation. Secure payment. Stress-free experience.', cls='cta-text'),
                     cls='container',
                 ),
@@ -434,6 +435,7 @@ def marketing_page():
                         Ul(
                             Li(A('How It Works', href='#how-it-works')),
                             Li(A('Pricing', href='#quote')),
+                            Li(A('Track My Booking', href='/booking/lookup')),
                             Li(A('FAQ', href='#')),
                             Li(A('Contact Us', href='mailto:hello@harbourclean.com.au')),
                         ),

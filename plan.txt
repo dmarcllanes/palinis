@@ -1,0 +1,523 @@
+# Booking Backend — Implementation Plan
+# Harbour Clean Co (FastHTML + Supabase Postgres + Pydantic v2)
+
+## Stack
+- FastHTML (server-rendered Python web framework)
+- asyncpg (direct Postgres connection, no ORM)
+- Pydantic v2 (validation)
+- DATABASE_URL from environment variable
+
+## User Answers
+- No Supabase yet → DATABASE_URL from env, graceful error if missing
+- Post-booking → email confirmation stub (console log for now, interface ready for Resend/SendGrid)
+- Booking form fields → name, email, phone, address, postcode, date, service type, bedrooms, bathrooms
+
+---
+
+## Architecture (from CLAUDE.md)
+Routes → Service → Domain → Repository → Postgres
+
+Rules:
+- Routes: NO business logic, NO direct DB access
+- Services: ALL business logic lives here
+- Domain: Pydantic v2 models, enums, state machine
+- Repositories: Raw SQL via asyncpg
+
+---
+
+## Booking Status State Machine
+pending_payment → confirmed
+confirmed → assigned
+assigned → completed
+any → cancelled
+
+---
+
+## Implementation Order (bottom-up)
+
+### STEP 1: config.py
+Load env vars using python-dotenv:
+- DATABASE_URL (asyncpg-compatible postgresql://...)
+- APP_SECRET (for future session/auth)
+
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+APP_SECRET = os.getenv("APP_SECRET", "change-me")
+```
+
+---
+
+### STEP 2: domain/enums.py
+```python
+from enum import Enum
+
+class BookingStatus(str, Enum):
+    pending_payment = "pending_payment"
+    confirmed = "confirmed"
+    assigned = "assigned"
+    completed = "completed"
+    cancelled = "cancelled"
+
+class ServiceType(str, Enum):
+    regular = "regular"
+    deep = "deep"
+    end_of_lease = "end_of_lease"
+```
+
+---
+
+### STEP 3: domain/service_area.py
+```python
+from pydantic import BaseModel
+
+class ServiceArea(BaseModel):
+    id: int
+    postcode: str
+    suburb: str
+    is_active: bool
+```
+
+---
+
+### STEP 4: domain/booking.py
+```python
+from pydantic import BaseModel, EmailStr
+from decimal import Decimal
+from datetime import date, datetime
+from uuid import UUID
+from domain.enums import BookingStatus, ServiceType
+
+class CreateBookingRequest(BaseModel):
+    customer_name: str
+    email: EmailStr
+    phone: str
+    address: str
+    postcode: str
+    service_date: date
+    service_type: ServiceType
+    bedrooms: int       # 1-5
+    bathrooms: int      # 1-4
+
+class Booking(BaseModel):
+    id: UUID
+    customer_name: str
+    email: str
+    phone: str
+    address: str
+    postcode: str
+    service_date: date
+    service_type: ServiceType
+    bedrooms: int
+    bathrooms: int
+    total_price: Decimal
+    status: BookingStatus
+    created_at: datetime
+```
+
+---
+
+### STEP 5: domain/cleaner.py
+```python
+from pydantic import BaseModel
+from uuid import UUID
+
+class Cleaner(BaseModel):
+    id: UUID
+    name: str
+    email: str
+    is_active: bool
+```
+
+---
+
+### STEP 6: repositories/db.py
+```python
+import asyncpg
+from config import DATABASE_URL
+
+_pool = None
+
+async def init_pool():
+    global _pool
+    if not DATABASE_URL:
+        print("[DB] WARNING: DATABASE_URL not set. DB features disabled.")
+        return
+    _pool = await asyncpg.create_pool(DATABASE_URL)
+
+async def close_pool():
+    global _pool
+    if _pool:
+        await _pool.close()
+
+def get_pool():
+    return _pool
+```
+
+---
+
+### STEP 7: repositories/service_area_repo.py
+```python
+from domain.service_area import ServiceArea
+
+async def get_by_postcode(pool, postcode: str) -> ServiceArea | None:
+    row = await pool.fetchrow(
+        "SELECT * FROM service_areas WHERE postcode = $1", postcode
+    )
+    if row is None:
+        return None
+    return ServiceArea(**dict(row))
+```
+
+---
+
+### STEP 8: repositories/booking_repo.py
+```python
+from domain.booking import CreateBookingRequest, Booking
+from decimal import Decimal
+from uuid import UUID
+
+async def create(pool, request: CreateBookingRequest, price: Decimal) -> Booking:
+    row = await pool.fetchrow(
+        """
+        INSERT INTO bookings
+            (customer_name, email, phone, address, postcode,
+             service_date, service_type, bedrooms, bathrooms, total_price)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        RETURNING *
+        """,
+        request.customer_name, request.email, request.phone,
+        request.address, request.postcode, request.service_date,
+        request.service_type.value, request.bedrooms, request.bathrooms, price
+    )
+    return Booking(**dict(row))
+
+async def get_by_id(pool, booking_id: UUID) -> Booking | None:
+    row = await pool.fetchrow(
+        "SELECT * FROM bookings WHERE id = $1", booking_id
+    )
+    if row is None:
+        return None
+    return Booking(**dict(row))
+```
+
+---
+
+### STEP 9: services/pricing_service.py
+# Must mirror the JS calculator in static/js/script.js exactly
+
+```python
+from decimal import Decimal, ROUND_HALF_UP
+from domain.enums import ServiceType
+
+BASE_PRICES: dict[ServiceType, dict[int, int]] = {
+    ServiceType.regular:      {1: 89,  2: 135, 3: 165, 4: 195, 5: 225},
+    ServiceType.deep:         {1: 149, 2: 189, 3: 245, 4: 299, 5: 349},
+    ServiceType.end_of_lease: {1: 199, 2: 299, 3: 399, 4: 499, 5: 599},
+}
+
+BATHROOM_MULTIPLIERS: dict[int, float] = {
+    1: 1.0, 2: 1.15, 3: 1.3, 4: 1.45
+}
+
+def calculate_price(
+    service_type: ServiceType,
+    bedrooms: int,
+    bathrooms: int,
+) -> Decimal:
+    base = BASE_PRICES[service_type][bedrooms]
+    multiplier = BATHROOM_MULTIPLIERS[bathrooms]
+    price = Decimal(str(base * multiplier)).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+    return price
+```
+
+---
+
+### STEP 10: services/service_area_service.py
+```python
+from repositories import service_area_repo
+from domain.service_area import ServiceArea
+
+async def validate_postcode(pool, postcode: str) -> ServiceArea:
+    area = await service_area_repo.get_by_postcode(pool, postcode)
+    if area is None:
+        raise ValueError(f"Postcode {postcode} is not in our service area.")
+    if not area.is_active:
+        raise ValueError(f"We are not currently servicing postcode {postcode}.")
+    return area
+```
+
+---
+
+### STEP 11: services/status_transition_service.py
+```python
+from domain.enums import BookingStatus
+
+ALLOWED_TRANSITIONS: dict[BookingStatus, list[BookingStatus]] = {
+    BookingStatus.pending_payment: [BookingStatus.confirmed, BookingStatus.cancelled],
+    BookingStatus.confirmed:       [BookingStatus.assigned,  BookingStatus.cancelled],
+    BookingStatus.assigned:        [BookingStatus.completed, BookingStatus.cancelled],
+    BookingStatus.completed:       [],
+    BookingStatus.cancelled:       [],
+}
+
+def validate_transition(current: BookingStatus, new: BookingStatus) -> None:
+    allowed = ALLOWED_TRANSITIONS.get(current, [])
+    if new not in allowed:
+        raise ValueError(
+            f"Cannot transition booking from '{current}' to '{new}'."
+        )
+```
+
+---
+
+### STEP 12: services/email_service.py
+# Stub — replace with Resend/SendGrid when ready
+
+```python
+from domain.booking import Booking
+
+async def send_booking_confirmation(booking: Booking) -> None:
+    # TODO: replace with real email provider (Resend, SendGrid, etc.)
+    print(f"[EMAIL] Booking confirmation sent to {booking.email}")
+    print(f"  Booking ID : {booking.id}")
+    print(f"  Customer   : {booking.customer_name}")
+    print(f"  Service    : {booking.service_type.value}")
+    print(f"  Date       : {booking.service_date}")
+    print(f"  Total      : ${booking.total_price}")
+```
+
+---
+
+### STEP 13: services/booking_service.py
+# Orchestrates the full booking flow
+
+```python
+from domain.booking import CreateBookingRequest, Booking
+from services import pricing_service, service_area_service, email_service
+from repositories import booking_repo
+
+async def create_booking(pool, request: CreateBookingRequest) -> Booking:
+    # 1. Validate postcode against DB
+    await service_area_service.validate_postcode(pool, request.postcode)
+
+    # 2. Calculate price server-side (source of truth)
+    price = pricing_service.calculate_price(
+        request.service_type,
+        request.bedrooms,
+        request.bathrooms,
+    )
+
+    # 3. Persist to DB
+    booking = await booking_repo.create(pool, request, price)
+
+    # 4. Send email confirmation (stub)
+    await email_service.send_booking_confirmation(booking)
+
+    return booking
+```
+
+---
+
+### STEP 14: app/routes/booking.py
+# FastHTML form routes
+
+```python
+from fasthtml.common import *
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
+from pydantic import ValidationError
+from domain.booking import CreateBookingRequest
+from domain.enums import ServiceType
+from services import booking_service
+from repositories.db import get_pool
+
+def booking_form_page(errors: dict = {}):
+    # Returns full HTML page with booking form
+    # Fields: customer_name, email, phone, address, postcode,
+    #         service_date, service_type, bedrooms, bathrooms
+    # Shows inline error messages if errors dict is non-empty
+    ...
+
+def booking_confirmation_page(booking):
+    # Returns confirmation HTML page showing:
+    # Booking ID, customer name, service type, date, price, status
+    ...
+
+async def get_booking_form(request: Request):
+    return booking_form_page()
+
+async def post_booking_form(request: Request):
+    pool = get_pool()
+    form = await request.form()
+    try:
+        req = CreateBookingRequest(
+            customer_name=form.get("customer_name"),
+            email=form.get("email"),
+            phone=form.get("phone"),
+            address=form.get("address"),
+            postcode=form.get("postcode"),
+            service_date=form.get("service_date"),
+            service_type=ServiceType(form.get("service_type")),
+            bedrooms=int(form.get("bedrooms")),
+            bathrooms=int(form.get("bathrooms")),
+        )
+        booking = await booking_service.create_booking(pool, req)
+        return RedirectResponse(f"/booking/{booking.id}", status_code=303)
+    except ValidationError as e:
+        errors = {err["loc"][0]: err["msg"] for err in e.errors()}
+        return booking_form_page(errors=errors)
+    except ValueError as e:
+        return booking_form_page(errors={"postcode": str(e)})
+
+async def get_booking_confirmation(request: Request):
+    booking_id = request.path_params["id"]
+    pool = get_pool()
+    from repositories import booking_repo
+    from uuid import UUID
+    booking = await booking_repo.get_by_id(pool, UUID(booking_id))
+    if booking is None:
+        return Html(Body(H1("Booking not found")))
+    return booking_confirmation_page(booking)
+```
+
+---
+
+### STEP 15: migrations/001_create_service_areas.sql
+```sql
+CREATE TABLE IF NOT EXISTS service_areas (
+    id         SERIAL PRIMARY KEY,
+    postcode   VARCHAR(4)   NOT NULL UNIQUE,
+    suburb     VARCHAR(100) NOT NULL,
+    is_active  BOOLEAN      NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+-- Seed: Sydney service areas
+INSERT INTO service_areas (postcode, suburb) VALUES
+    ('2000', 'Sydney CBD'),
+    ('2010', 'Surry Hills'),
+    ('2011', 'Darlinghurst'),
+    ('2009', 'Pyrmont'),
+    ('2017', 'Zetland'),
+    ('2026', 'Bondi'),
+    ('2034', 'Coogee'),
+    ('2028', 'Double Bay'),
+    ('2031', 'Randwick'),
+    ('2042', 'Newtown'),
+    ('2037', 'Glebe'),
+    ('2041', 'Balmain'),
+    ('2204', 'Marrickville'),
+    ('2067', 'Chatswood'),
+    ('2088', 'Mosman'),
+    ('2066', 'Lane Cove'),
+    ('2077', 'Hornsby')
+ON CONFLICT (postcode) DO NOTHING;
+```
+
+---
+
+### STEP 16: migrations/002_create_bookings.sql
+```sql
+CREATE TABLE IF NOT EXISTS bookings (
+    id            UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    customer_name VARCHAR(255) NOT NULL,
+    email         VARCHAR(255) NOT NULL,
+    phone         VARCHAR(20)  NOT NULL,
+    address       TEXT         NOT NULL,
+    postcode      VARCHAR(4)   NOT NULL,
+    service_date  DATE         NOT NULL,
+    service_type  VARCHAR(20)  NOT NULL,
+    bedrooms      SMALLINT     NOT NULL CHECK (bedrooms BETWEEN 1 AND 5),
+    bathrooms     SMALLINT     NOT NULL CHECK (bathrooms BETWEEN 1 AND 4),
+    total_price   NUMERIC(10,2) NOT NULL,
+    status        VARCHAR(30)  NOT NULL DEFAULT 'pending_payment',
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### STEP 17: migrations/003_create_cleaners.sql
+```sql
+CREATE TABLE IF NOT EXISTS cleaners (
+    id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    name       VARCHAR(255) NOT NULL,
+    email      VARCHAR(255) NOT NULL UNIQUE,
+    is_active  BOOLEAN      NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+### STEP 18: migrations/004_indexes.sql
+```sql
+CREATE INDEX IF NOT EXISTS idx_bookings_status       ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_service_date ON bookings(service_date);
+CREATE INDEX IF NOT EXISTS idx_bookings_email        ON bookings(email);
+CREATE INDEX IF NOT EXISTS idx_service_areas_postcode ON service_areas(postcode);
+```
+
+---
+
+### STEP 19: main.py — Add lifespan + register booking routes
+```python
+from contextlib import asynccontextmanager
+from fasthtml.common import *
+from starlette.responses import FileResponse
+from app.routes.marketing import marketing_page
+from app.routes.booking import get_booking_form, post_booking_form, get_booking_confirmation
+from repositories import db
+
+@asynccontextmanager
+async def lifespan(app):
+    await db.init_pool()
+    yield
+    await db.close_pool()
+
+app, rt = fast_app(static_path='static', lifespan=lifespan)
+
+@rt("/")
+def get():
+    return marketing_page()
+
+@rt("/manifest.json")
+def manifest():
+    return FileResponse("static/manifest.json", media_type="application/manifest+json")
+
+@rt("/book")
+async def get(request):
+    return await get_booking_form(request)
+
+@rt("/book", methods=["POST"])
+async def post(request):
+    return await post_booking_form(request)
+
+@rt("/booking/{id}")
+async def get(request):
+    return await get_booking_confirmation(request)
+```
+
+---
+
+### STEP 20: requirements.txt — Add asyncpg
+Add line: asyncpg==0.29.0
+
+---
+
+## Verification Checklist
+- python main.py starts without error (DB skipped gracefully if no DATABASE_URL)
+- GET /book renders the booking form with all fields
+- POST /book with valid Sydney postcode → redirects to /booking/{uuid}
+- POST /book with invalid postcode → re-renders form with error message
+- POST /book with missing fields → Pydantic error shown inline
+- Console shows [EMAIL] log after successful booking
+- Pricing matches JS calculator values exactly (e.g. regular, 2bed, 2bath = $155)
+- Run migrations in Supabase SQL editor in order: 001 → 002 → 003 → 004
