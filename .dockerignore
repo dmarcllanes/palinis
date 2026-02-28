@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment files — never commit secrets
+.env
+.env.*
+!.env.example
+
+# uv lock / dev tooling
+uv.lock
+.uv/
+
+# Git
+.git/
+.gitignore
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docs / extras
+*.md
+CLAUDE.md
+palinis.txt

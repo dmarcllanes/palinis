@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harbour Clean Co. - Premium Home Cleaning in Sydney</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Harbour Clean Co.</div>
+            <div class="nav-links">
+                <a href="#how-it-works">How It Works</a>
+                <a href="#services">Services</a>
+                <a href="#quote">Get Quote</a>
+                <a href="#contact" class="cta-link">Book Now</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Premium Home Cleaning Across Sydney.</h1>
+            <p class="hero-subtitle">Trusted, police-checked cleaners. Instant online booking. No lock-in contracts.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary"
+                    onclick="document.getElementById('quote').scrollIntoView({behavior: 'smooth'})">Get Instant
+                    Quote</button>
+                <button class="btn btn-secondary"
+                    onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})">Book Now</button>
+            </div>
+            <div class="trust-badges">
+                <div class="badge">✔ Fully Insured</div>
+                <div class="badge">✔ Satisfaction Guarantee</div>
+                <div class="badge">✔ 5-Star Rated Across Sydney</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Choose Your Service</h3>
+                <p>Select regular, deep, or end-of-lease cleaning.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Pick Date & Time</h3>
+                <p>Flexible scheduling that fits your lifestyle.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Relax</h3>
+                <p>Our trusted Sydney cleaners handle the rest.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="services" id="services">
+        <h2>Cleaning Services Designed for Sydney Homes</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Regular Cleaning</h3>
+                <p>Perfect for weekly or fortnightly upkeep.</p>
+                <div class="price">From $89</div>
+                <button class="btn btn-outline">Book Now</button>
+            </div>
+            <div class="service-card">
+                <h3>Deep Cleaning</h3>
+                <p>For seasonal refresh or detailed reset.</p>
+                <div class="price">From $189</div>
+                <button class="btn btn-outline">Book Now</button>
+            </div>
+            <div class="service-card">
+                <h3>End of Lease Cleaning</h3>
+                <p>Bond-back guarantee service for Sydney rentals.</p>
+                <div class="price">From $299</div>
+                <button class="btn btn-outline">Book Now</button>
+            </div>
+            <div class="service-card">
+                <h3>Move-In Cleaning</h3>
+                <p>Start fresh in your new home.</p>
+                <div class="price">From $249</div>
+                <button class="btn btn-outline">Book Now</button>
+            </div>
+            <div class="service-card">
+                <h3>Apartment Cleaning</h3>
+                <p>Designed for CBD and high-rise living.</p>
+                <div class="price">From $79</div>
+                <button class="btn btn-outline">Book Now</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Quote Calculator -->
+    <section class="quote-calculator" id="quote">
+        <h2>Get Your Instant Quote</h2>
+        <div class="calculator">
+            <div class="calculator-inputs">
+                <div class="input-group">
+                    <label for="bedrooms">Bedrooms</label>
+                    <select id="bedrooms" onchange="updateQuote()">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5+</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="bathrooms">Bathrooms</label>
+                    <select id="bathrooms" onchange="updateQuote()">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4+</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="service-type">Service Type</label>
+                    <select id="service-type" onchange="updateQuote()">
+                        <option value="regular">Regular Cleaning</option>
+                        <option value="deep">Deep Cleaning</option>
+                        <option value="endlease">End of Lease</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="addons">
+                <label>Add-ons</label>
+                <div class="addon-list">
+                    <label class="addon-item">
+                        <input type="checkbox" value="oven" onchange="updateQuote()"> Oven Cleaning (+$35)
+                    </label>
+                    <label class="addon-item">
+                        <input type="checkbox" value="carpet" onchange="updateQuote()"> Carpet Cleaning (+$50)
+                    </label>
+                    <label class="addon-item">
+                        <input type="checkbox" value="balcony" onchange="updateQuote()"> Balcony (+$25)
+                    </label>
+                    <label class="addon-item">
+                        <input type="checkbox" value="windows" onchange="updateQuote()"> Windows (+$40)
+                    </label>
+                </div>
+            </div>
+
+            <div class="price-display">
+                <div class="price-label">Estimated Price</div>
+                <div class="price-value" id="price-value">$195</div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;">Book Now</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="why-choose-us">
+        <h2>Why Sydney Chooses Harbour Clean Co.</h2>
+        <div class="benefits">
+            <div class="benefit">
+                <span class="checkmark">✓</span>
+                <p>Experienced & vetted cleaners</p>
+            </div>
+            <div class="benefit">
+                <span class="checkmark">✓</span>
+                <p>Transparent pricing</p>
+            </div>
+            <div class="benefit">
+                <span class="checkmark">✓</span>
+                <p>Eco-friendly products available</p>
+            </div>
+            <div class="benefit">
+                <span class="checkmark">✓</span>
+                <p>No hidden fees</p>
+            </div>
+            <div class="benefit">
+                <span class="checkmark">✓</span>
+                <p>Easy rescheduling</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscription Offer -->
+    <section class="subscription-offer">
+        <h2>Save With Recurring Cleaning</h2>
+        <div class="subscription-plans">
+            <div class="plan">
+                <h3>Weekly</h3>
+                <div class="discount">Save 10%</div>
+                <p class="plan-desc">Best for busy professionals</p>
+            </div>
+            <div class="plan">
+                <h3>Fortnightly</h3>
+                <div class="discount">Save 7%</div>
+                <p class="plan-desc">Perfect balance</p>
+            </div>
+            <div class="plan">
+                <h3>Monthly</h3>
+                <div class="discount">Save 5%</div>
+                <p class="plan-desc">Flexible option</p>
+            </div>
+        </div>
+        <p class="plan-note">Cancel anytime. No contracts.</p>
+    </section>
+
+    <!-- Service Areas -->
+    <section class="service-areas">
+        <h2>Servicing Sydney's Most Popular Areas</h2>
+        <div class="areas-grid">
+            <div class="area">Sydney CBD</div>
+            <div class="area">Eastern Suburbs</div>
+            <div class="area">Inner West</div>
+            <div class="area">North Shore</div>
+        </div>
+    </section>
+
+    <!-- Reviews -->
+    <section class="reviews">
+        <h2>Trusted by Sydney Homeowners</h2>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"Harbour Clean Co. transformed my apartment. Professional, punctual, and thorough. Highly recommend!"
+                </p>
+                <div class="reviewer">— Sarah M., CBD</div>
+            </div>
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"Best cleaning service I've used. The team was respectful and did an amazing job on our end-of-lease
+                    clean."</p>
+                <div class="reviewer">— James T., Eastern Suburbs</div>
+            </div>
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"Finally found a reliable cleaning service! They made my move-in cleaning stress-free. Worth every
+                    penny."</p>
+                <div class="reviewer">— Emma L., Inner West</div>
+            </div>
+            <div class="review-card">
+                <div class="stars">★★★★★</div>
+                <p>"Outstanding service and excellent communication. My home has never looked better. Already booked for
+                    next month!"</p>
+                <div class="reviewer">— Michael R., North Shore</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta" id="contact">
+        <h2>Ready for a Cleaner Home?</h2>
+        <button class="btn btn-primary btn-large">Book Your Cleaning Today</button>
+        <p class="cta-text">Instant confirmation. Secure payment. Stress-free experience.</p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#services">Regular Cleaning</a></li>
+                    <li><a href="#services">Deep Cleaning</a></li>
+                    <li><a href="#services">End of Lease</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#quote">Pricing</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <ul>
+                    <li>ABN: 12 345 678 901</li>
+                    <li><a href="tel:+61291234567">(02) 9123 4567</a></li>
+                    <li><a href="mailto:hello@harbourclean.com.au">hello@harbourclean.com.au</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Service Areas</h4>
+                <ul>
+                    <li><a href="#">Sydney CBD</a></li>
+                    <li><a href="#">Eastern Suburbs</a></li>
+                    <li><a href="#">Inner West</a></li>
+                    <li><a href="#">North Shore</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Harbour Clean Co. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
