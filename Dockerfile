@@ -1,5 +1,8 @@
 # ─── Stage 1: Builder ────────────────────────────────────────────────────────
-FROM ghcr.io/astral-sh/uv:python3.11-slim AS builder
+FROM python:3.11-slim AS builder
+
+# Copy uv binary from the official uv image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 WORKDIR /app
 
