@@ -7,9 +7,9 @@ _pool = None
 async def init_pool():
     global _pool
     if not DATABASE_URL:
-        print("[DB] WARNING: DATABASE_URL not set. DB features disabled.")
-        return
-    _pool = await asyncpg.create_pool(DATABASE_URL)
+        raise RuntimeError("DATABASE_URL environment variable is not set.")
+    _pool = await asyncpg.create_pool(DATABASE_URL, ssl="require")
+    print("[DB] Connection pool created.")
 
 
 async def close_pool():
@@ -19,4 +19,6 @@ async def close_pool():
 
 
 def get_pool():
+    if _pool is None:
+        raise RuntimeError("Database pool is not initialized. Check DATABASE_URL.")
     return _pool
