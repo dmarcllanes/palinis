@@ -19,8 +19,7 @@ env/
 .env.*
 !.env.example
 
-# uv lock / dev tooling
-uv.lock
+# uv dev tooling
 .uv/
 
 # Git
