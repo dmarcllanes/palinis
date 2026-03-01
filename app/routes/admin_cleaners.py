@@ -40,7 +40,14 @@ ADMIN_CLEANERS_CSS = """
 
 def _topbar():
     return Div(
-        Span(Span("Harbour Clean", cls=""), Span(" · Admin", cls=""), cls="admin-brand"),
+        A(
+            Img(src='/images/logo.png', alt='Logo', style='height: 24px; vertical-align: middle; margin-right: 0.5rem;'),
+            Span("Filo Cleaning Services", cls=""), 
+            Span(" · Admin", cls=""), 
+            cls="admin-brand",
+            href="/admin",
+            style="display: flex; align-items: center; text-decoration: none;"
+        ),
         Div(
             Span("Admin Panel", cls="topbar-label"),
             A("Bookings", href="/admin"),
@@ -105,7 +112,7 @@ def admin_cleaners_page(cleaners, flash=None, flash_type="success"):
             Meta(charset="UTF-8"),
             Meta(name="viewport", content="width=device-width, initial-scale=1.0"),
             Meta(http_equiv="Cache-Control", content="no-store, no-cache, must-revalidate"),
-            Title("Cleaners – Admin · Harbour Clean Co."),
+            Title("Cleaners – Admin · Filo Cleaning Services"),
             Style(ADMIN_CSS + ADMIN_CLEANERS_CSS),
         ),
         Body(

@@ -144,14 +144,15 @@ def cleaner_login_page(error: str = ""):
         Head(
             Meta(charset="UTF-8"),
             Meta(name="viewport", content="width=device-width, initial-scale=1.0"),
-            Title("Cleaner Login – Harbour Clean Co."),
+            Title("Cleaner Login – Filo Cleaning Services"),
             Style(PORTAL_CSS),
         ),
         Body(
             Div(
                 Div(
-                    P("Harbour Clean ", Span("Co.", cls=""), cls="login-logo"),
-                    H2("Cleaner Sign In"),
+                    Img(src='/images/logo.png', alt='Filo Logo', style='height: 80px; margin: 0 auto 1rem; display: block;'),
+                    P("Filo Cleaning Services", cls="login-logo", style="margin-bottom: 0.25rem; text-align: center;"),
+                    H2("Cleaner Sign In", style="margin-top: 0; text-align: center;"),
                     Div(error, cls="login-error") if error else None,
                     Form(
                         Div(
@@ -292,11 +293,13 @@ def cleaner_dashboard_page(cleaner, jobs):
         ),
         Body(
             Div(
-                Div(
-                    Span(cls="cl-brand-dot"),
-                    "Harbour Clean Co.",
+                A(
+                    Img(src='/images/logo.png', alt='Logo', style='height: 24px;'),
+                    "Filo Cleaning Services",
                     Span("· Portal", cls="cl-brand-sub"),
                     cls="cl-brand",
+                    href="/cleaners/dashboard",
+                    style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;"
                 ),
                 Div(
                     Form(Button("Sign Out", cls="cl-logout-btn"),

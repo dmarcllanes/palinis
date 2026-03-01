@@ -27,11 +27,13 @@ def _topbar(active: str = "bookings"):
         return A(label, href=href, cls=cls)
 
     return Div(
-        Div(
-            Span(cls="admin-brand-dot"),
-            "Harbour Clean Co.",
+        A(
+            Img(src='/images/logo.png', alt='Logo', style='height: 24px;'),
+            "Filo Cleaning Services",
             Span("· Admin", cls="admin-brand-sub"),
             cls="admin-brand",
+            href="/admin",
+            style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;"
         ),
         Div(
             _link("Bookings", "/admin", "bookings"),
@@ -101,14 +103,15 @@ def admin_login_page(error: str = ""):
         Head(
             Meta(charset="UTF-8"),
             Meta(name="viewport", content="width=device-width, initial-scale=1.0"),
-            Title("Admin Login – Harbour Clean Co."),
+            Title("Admin Login – Filo Cleaning Services"),
             Style(ADMIN_CSS),
         ),
         Body(
             Div(
                 Div(
-                    P("Harbour Clean", cls="login-logo"),
-                    H2("Admin Login"),
+                    Img(src='/images/logo.png', alt='Filo Logo', style='height: 80px; margin: 0 auto 1rem; display: block;'),
+                    P("Filo Cleaning Services", cls="login-logo", style="margin-bottom: 0.25rem; text-align: center;"),
+                    H2("Admin Login", style="margin-top: 0; text-align: center;"),
                     Div(error, cls="login-error") if error else None,
                     Form(
                         Div(
@@ -180,7 +183,7 @@ def admin_dashboard_page(bookings, active_cleaners, status_filter=None, flash=No
             Meta(name="viewport", content="width=device-width, initial-scale=1.0"),
             Meta(http_equiv="Cache-Control", content="no-store, no-cache, must-revalidate"),
             Meta(http_equiv="Pragma", content="no-cache"),
-            Title("Admin Dashboard – Harbour Clean Co."),
+            Title("Admin Dashboard – Filo Cleaning Services"),
             Style(ADMIN_CSS + ASSIGN_CSS),
         ),
         Body(

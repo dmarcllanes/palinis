@@ -1,8 +1,8 @@
-# Harbour Clean Co – System Architecture
+# Filo Cleaning Services – System Architecture
 
 ## Overview
 
-Harbour Clean Co is a Sydney-based home cleaning booking platform.
+Filo Cleaning Services is a Sydney-based home cleaning booking platform.
 
 This system is built using:
 
@@ -302,7 +302,7 @@ All non-marketing pages share a consistent modern navbar:
 - White background, no floating/pill shape
 - 3px gradient accent line at top (navy `#0f3f5e` → green `#1e9a68`)
 - Subtle shadow `0 1px 12px rgba(15,63,94,0.07)`
-- Brand dot (green circle) + "Harbour Clean Co." + grey sub-label
+- Brand dot (green circle) + "Filo Cleaning Services" + grey sub-label
 - Right-side links vary by page
 - Mobile: sub-labels hidden, links compact
 

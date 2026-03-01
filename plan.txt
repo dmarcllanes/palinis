@@ -1,5 +1,5 @@
 # Booking Backend — Implementation Plan
-# Harbour Clean Co (FastHTML + Supabase Postgres + Pydantic v2)
+# Filo Cleaning Services (FastHTML + Supabase Postgres + Pydantic v2)
 
 ## Stack
 - FastHTML (server-rendered Python web framework)

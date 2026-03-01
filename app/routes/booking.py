@@ -96,10 +96,11 @@ def booking_nav(right_links=None):
     return Nav(
         Div(
             A(
-                Span(cls="book-nav-dot"),
-                "Harbour Clean Co.",
+                Img(src='/images/logo.png', alt='Logo', style='height: 24px; margin-right: 8px; vertical-align: middle;'),
+                "Filo Cleaning Services",
                 href="/",
                 cls="book-nav-logo",
+                style="display: flex; align-items: center; text-decoration: none;"
             ),
             Div(*right_links, cls="book-nav-right"),
             cls="book-nav-inner",
@@ -460,7 +461,7 @@ def booking_form_page(errors: dict = {}):
         Head(
             Meta(charset="UTF-8"),
             Meta(name="viewport", content="width=device-width, initial-scale=1.0, viewport-fit=cover"),
-            Title("Book a Cleaning – Harbour Clean Co."),
+            Title("Book a Cleaning – Filo Cleaning Services"),
             Link(rel="stylesheet", href="/css/styles.css"),
             Style(BOOKING_NAV_CSS),
             Style(WIZARD_CSS),
@@ -706,7 +707,7 @@ def booking_confirmation_page(booking):
         Head(
             Meta(charset="UTF-8"),
             Meta(name="viewport", content="width=device-width, initial-scale=1.0, viewport-fit=cover"),
-            Title("Booking Confirmed – Harbour Clean Co."),
+            Title("Booking Confirmed – Filo Cleaning Services"),
             Link(rel="stylesheet", href="/css/styles.css"),
             Style(BOOKING_NAV_CSS),
             Style("""
@@ -905,7 +906,7 @@ def lookup_page(bookings=None, searched=False, email=""):
         Head(
             Meta(charset="UTF-8"),
             Meta(name="viewport", content="width=device-width, initial-scale=1.0, viewport-fit=cover"),
-            Title("Check Booking Status – Harbour Clean Co."),
+            Title("Check Booking Status – Filo Cleaning Services"),
             Link(rel="stylesheet", href="/css/styles.css"),
             Style(BOOKING_NAV_CSS),
             Style(LOOKUP_CSS),

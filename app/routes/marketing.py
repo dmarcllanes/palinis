@@ -10,8 +10,8 @@ def marketing_page():
             Meta(name='description', content='Premium home cleaning across Sydney. Trusted, police-checked cleaners. Instant online booking. No lock-in contracts.'),
             Meta(name='apple-mobile-web-app-capable', content='yes'),
             Meta(name='apple-mobile-web-app-status-bar-style', content='default'),
-            Meta(name='apple-mobile-web-app-title', content='Harbour Clean'),
-            Title('Harbour Clean Co. – Premium Home Cleaning in Sydney'),
+            Meta(name='apple-mobile-web-app-title', content='Filo Cleaning'),
+            Title('Filo Cleaning Services – Premium Home Cleaning in Sydney'),
             Link(rel='stylesheet', href='/css/styles.css'),
             Link(rel='manifest', href='/manifest.json'),
         ),
@@ -39,7 +39,15 @@ def marketing_page():
             # Navbar — must be a direct Body child for sticky to work across the full page
             Nav(
                 Div(
-                    Div('Harbour Clean Co.', cls='logo'),
+                    A(
+                        Div(
+                            Img(src='/images/logo.png', alt='Logo', cls='nav-logo-img'),
+                            'Filo Cleaning Services',
+                            cls='logo'
+                        ),
+                        href='/',
+                        style='text-decoration: none;'
+                    ),
                     Button(
                         Span(cls='bar'),
                         Span(cls='bar'),
@@ -264,7 +272,8 @@ def marketing_page():
             # Why Choose Us
             Section(
                 Div(
-                    H2('Why Sydney Chooses Harbour Clean Co.'),
+                    H2('Why Sydney Chooses Filo Cleaning Services'),
+                    P('We don\'t just clean surfaces—we restore comfort and peace of mind to your home.', cls='section-desc'),
                     Div(
                         Div(Span('✓', cls='checkmark'), P('Experienced & vetted cleaners'), cls='benefit'),
                         Div(Span('✓', cls='checkmark'), P('Transparent pricing'), cls='benefit'),
@@ -411,7 +420,7 @@ def marketing_page():
             Footer(
                 Div(
                     Div(
-                        H3('Harbour Clean Co.', cls='footer-brand-name'),
+                        H3('Filo Cleaning Services', cls='footer-brand-name'),
                         P('Premium home cleaning across Sydney. Trusted, police-checked professionals dedicated to making your space shine.', cls='footer-brand-desc'),
                         Div(
                             A('IG', href='#', cls='social-link', aria_label='Instagram'),
@@ -437,7 +446,7 @@ def marketing_page():
                             Li(A('Pricing', href='#quote')),
                             Li(A('Track My Booking', href='/booking/lookup')),
                             Li(A('FAQ', href='#')),
-                            Li(A('Contact Us', href='mailto:hello@harbourclean.com.au')),
+                            Li(A('Contact Us', href='mailto:hello@filocleaning.com.au')),
                         ),
                         cls='footer-section',
                     ),
@@ -453,7 +462,7 @@ def marketing_page():
                     ),
                     cls='footer-content',
                 ),
-                Div(P('© 2025 Harbour Clean Co. All rights reserved.'), cls='footer-bottom'),
+                Div(P('© 2025 Filo Cleaning Services. All rights reserved.'), cls='footer-bottom'),
                 cls='footer',
             ),
 

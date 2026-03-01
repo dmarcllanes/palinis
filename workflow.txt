@@ -1,219 +1,33 @@
-================================================================
-  HARBOUR CLEAN CO — BUSINESS WORKFLOW & HOW THE APP WORKS
-================================================================
+👤 CUSTOMER
+1. Goes to the website and picks a service (Regular, Deep, or End of Lease)
+2. Selects bedrooms, bathrooms — price shows instantly
+3. Picks a date and available time slot
+4. Enters their contact details and address
+5. Reviews and submits the booking
 
+📋 ADMIN (You)
+6. You get a new booking in the Admin Panel
+7. You review it — then Confirm, Cancel, or Flag it
+8. Once confirmed, you assign a cleaner to the job
 
-────────────────────────────────────────────────────────────────
-  THE BIG PICTURE
-────────────────────────────────────────────────────────────────
+🧹 CLEANER
+9. Cleaner logs into their portal and sees the job
+10. Shows up, does the clean
 
-  Customer books online
-        ↓
-  Admin reviews & confirms
-        ↓
-  Cleaner gets assigned
-        ↓
-  Job completed
-        ↓
-  Everyone's happy ✓
+✅ DONE
+11. Admin marks the job as Completed
 
+---
 
-────────────────────────────────────────────────────────────────
-  STEP 1 — CUSTOMER BOOKS A CLEANING
-────────────────────────────────────────────────────────────────
+KEY THINGS TO KNOW
 
-  The customer visits the website and fills out a 5-step form.
+• Slots only get blocked after YOU confirm a booking — you're always in control
+• Number of active cleaners = how many bookings per time slot
+• Customers can track their booking anytime at https://palinis-production.up.railway.app/booking/lookup
+• Suspicious bookings are automatically flagged for your review before anything happens
 
-  Step 1 · Choose a service
-           - Regular Cleaning    (weekly / fortnightly upkeep)
-           - Deep Cleaning        (seasonal or detailed reset)
-           - End of Lease         (bond-back for rentals)
+---
 
-  Step 2 · Tell us about the property
-           - How many bedrooms? (1–5)
-           - How many bathrooms? (1–4)
-           - Price estimate shows live on screen
-
-  Step 3 · Pick a date and time
-           - Customer picks a date from the calendar
-           - Available time slots appear automatically:
-             8:00 AM / 10:00 AM / 12:00 PM / 2:00 PM / 4:00 PM
-           - Fully booked slots are greyed out — can't be selected
-           - If a slot is full, the system suggests the next
-             available time or date automatically
-
-  Step 4 · Enter contact details
-           - Full name, email, phone number
-           - Property address and postcode
-           - Only Sydney service areas are accepted
-
-  Step 5 · Review and confirm
-           - Customer sees a full summary of their booking
-           - Clicks "Confirm Booking" to submit
-
-  ✅ Booking is received. Customer sees a confirmation screen
-     with their booking reference number.
-
-  NOTE: The booking is NOT yet confirmed at this point.
-        It is sitting in the system as "Awaiting Confirmation"
-        until the admin reviews and approves it.
-
-
-────────────────────────────────────────────────────────────────
-  STEP 2 — ADMIN REVIEWS THE BOOKING
-────────────────────────────────────────────────────────────────
-
-  You (the business owner / admin) log into the Admin Panel.
-
-  What you see on the dashboard:
-  - Total bookings count
-  - How many are new / confirmed / assigned / completed / cancelled
-  - A full list of every booking with customer details
-
-  For each new booking you can:
-
-  ✅ Confirm it     → moves to "Confirmed"
-                       slot is now officially blocked in the calendar
-                       cleaner can be assigned
-
-  ❌ Cancel it      → moves to "Cancelled"
-                       slot is freed up for other customers
-
-  🚩 Flag it        → moves to "Flagged for Review"
-                       for suspicious or problematic bookings
-                       slot stays open until you decide
-
-  IMPORTANT: A time slot only becomes unavailable to new customers
-             AFTER you confirm a booking. Pending bookings do not
-             block the calendar — you are always in control.
-
-
-────────────────────────────────────────────────────────────────
-  STEP 3 — ASSIGN A CLEANER TO THE JOB
-────────────────────────────────────────────────────────────────
-
-  Once a booking is confirmed, you assign one of your cleaners.
-
-  From the booking in the Admin Panel:
-  - Select a cleaner from the dropdown list
-  - Click "Assign"
-  - Booking moves to "Cleaner Assigned"
-  - The assigned cleaner can now see this job in their portal
-
-  Only active cleaners appear in the dropdown.
-  If a cleaner is deactivated, they won't show up.
-
-
-────────────────────────────────────────────────────────────────
-  STEP 4 — CLEANER DOES THE JOB
-────────────────────────────────────────────────────────────────
-
-  The cleaner logs into the Cleaner Portal (separate login).
-
-  On their portal they can see:
-  - All jobs assigned to them
-  - Job details: address, date, time, service type, property size
-  - Upcoming jobs vs completed jobs
-
-  Once the job is done, the admin marks it as "Completed"
-  from the Admin Panel.
-
-
-────────────────────────────────────────────────────────────────
-  MANAGING YOUR CLEANERS
-────────────────────────────────────────────────────────────────
-
-  Go to Admin Panel → Cleaners tab.
-
-  You can:
-  + Add a new cleaner          (name, email, phone, login details)
-  ~ Activate / Deactivate      (toggle without deleting)
-  - Remove a cleaner           (permanent delete)
-
-  Deactivating a cleaner:
-  - They can no longer log into the portal
-  - They won't appear for new job assignments
-  - Their existing assigned jobs are unaffected
-
-  The number of active cleaners directly controls how many
-  bookings can be taken per time slot. For example:
-  - 2 active cleaners = up to 2 bookings per time slot
-  - 3 active cleaners = up to 3 bookings per time slot
-
-
-────────────────────────────────────────────────────────────────
-  HOW CUSTOMERS TRACK THEIR BOOKING
-────────────────────────────────────────────────────────────────
-
-  Customers can visit:  yoursite.com/booking/lookup
-
-  They enter the email address they used when booking.
-  The system shows all their bookings with the current status.
-
-  Status labels customers see:
-  - "Awaiting Confirmation"  → waiting for admin approval
-  - "Confirmed"              → booking is locked in
-  - "Cleaner Assigned"       → a cleaner has been scheduled
-  - "In Progress"            → cleaning is happening now
-  - "Completed"              → job is done
-  - "Cancelled"              → booking was cancelled
-  - "Under Review"           → flagged, being looked into
-
-
-────────────────────────────────────────────────────────────────
-  BOOKING STATUS LIFECYCLE AT A GLANCE
-────────────────────────────────────────────────────────────────
-
-  Customer submits → AWAITING CONFIRMATION
-                           ↓
-  Admin approves   → CONFIRMED
-                           ↓
-  Cleaner assigned → CLEANER ASSIGNED
-                           ↓
-  Job starts       → IN PROGRESS
-                           ↓
-  Job done         → COMPLETED
-
-  At any point    → CANCELLED  (admin cancels)
-  At any point    → FLAGGED FOR REVIEW  (suspicious booking)
-
-
-────────────────────────────────────────────────────────────────
-  FRAUD & SPAM PROTECTION (BUILT IN)
-────────────────────────────────────────────────────────────────
-
-  The system automatically protects you from bad actors:
-
-  - Only valid Sydney postcodes are accepted
-  - All contact details are validated (real email format, etc.)
-  - Suspicious bookings are automatically flagged for your review
-    instead of being confirmed — you stay in control
-  - Bookings cannot jump between statuses randomly —
-    the system enforces the correct order at all times
-
-
-────────────────────────────────────────────────────────────────
-  LOGINS SUMMARY
-────────────────────────────────────────────────────────────────
-
-  Admin Panel      yoursite.com/admin
-                   → Full control: bookings, cleaners, statuses
-
-  Cleaner Portal   yoursite.com/cleaners
-                   → Cleaners see their own jobs only
-                   → Each cleaner has their own username & password
-
-
-────────────────────────────────────────────────────────────────
-  WHAT'S COMING NEXT
-────────────────────────────────────────────────────────────────
-
-  - Online payments via Stripe
-  - Automatic SMS / email notifications to customers
-  - Recurring booking support (weekly / fortnightly)
-  - Multi-city expansion beyond Sydney
-
-
-================================================================
-  Questions? Reach the dev team for any technical support.
-================================================================
+LOGINS
+Admin Panel   → https://palinis-production.up.railway.app/admin
+Cleaner Login → https://palinis-production.up.railway.app/cleaners
