@@ -328,6 +328,20 @@ section h2::after {
         top: 8px;
     }
 
+    .nav-container {
+        padding: 0 16px;
+    }
+
+    .logo {
+        font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+        gap: 0.35rem;
+        white-space: nowrap;
+    }
+
+    .nav-logo-img {
+        height: 36px;
+    }
+
     .hamburger {
         display: flex;
     }
