@@ -8,19 +8,19 @@ from repositories.db import get_pool
 
 WIZARD_CSS = """
 /* ── Base ── */
-.booking-page { min-height: 100vh; background: #f8f9fb; padding: 2rem 0 5rem; }
-.wizard-container { max-width: 660px; margin: 0 auto; padding: 0 1.5rem; }
+.booking-page { min-height: 100vh; background: #f8f9fb; padding: 0 0 5rem; }
+.wizard-container { max-width: 660px; margin: 2rem auto 0; padding: 0 1.5rem; }
 
 /* ── Progress ── */
 .wizard-progress { display: flex; align-items: center; justify-content: center; margin-bottom: 2.5rem; }
 .progress-step { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
-.step-num { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; background: #e2e8f0; color: #94a3b8; transition: all 0.3s; }
-.progress-step.active .step-num { background: #1a4d6d; color: #fff; }
-.progress-step.done .step-num { background: #16a34a; color: #fff; }
-.step-label { font-size: 0.68rem; color: #94a3b8; font-weight: 500; white-space: nowrap; }
-.progress-step.active .step-label, .progress-step.done .step-label { color: #1a4d6d; }
-.progress-line { flex: 1; height: 2px; background: #e2e8f0; max-width: 50px; margin-bottom: 1.3rem; transition: background 0.3s; }
-.progress-line.done { background: #16a34a; }
+.step-num { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; background: var(--bg-light, #e2e8f0); color: var(--text-light, #94a3b8); transition: all 0.3s; }
+.progress-step.active .step-num { background: var(--primary, #0f3f5e); color: #fff; }
+.progress-step.done .step-num { background: var(--accent, #1e9a68); color: #fff; }
+.step-label { font-size: 0.68rem; color: var(--text-light, #94a3b8); font-weight: 500; white-space: nowrap; }
+.progress-step.active .step-label, .progress-step.done .step-label { color: var(--primary, #0f3f5e); }
+.progress-line { flex: 1; height: 2px; background: var(--border, #e2e8f0); max-width: 50px; margin-bottom: 1.3rem; transition: background 0.3s; }
+.progress-line.done { background: var(--accent, #1e9a68); }
 
 /* ── Card ── */
 .wizard-card { background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
@@ -31,37 +31,37 @@ WIZARD_CSS = """
 
 /* ── Service cards ── */
 .service-options { display: flex; flex-direction: column; gap: 0.85rem; }
-.service-option { border: 2px solid #e2e8f0; border-radius: 12px; padding: 1.1rem 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 1rem; user-select: none; }
-.service-option:hover { border-color: #1a4d6d; background: #f0f7ff; }
-.service-option.selected { border-color: #1a4d6d; background: #f0f7ff; }
+.service-option { border: 2px solid var(--border, #e2e8f0); border-radius: 12px; padding: 1.1rem 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 1rem; user-select: none; }
+.service-option:hover { border-color: var(--primary, #0f3f5e); background: var(--bg-light, #f0f7fb); }
+.service-option.selected { border-color: var(--primary, #0f3f5e); background: var(--bg-light, #f0f7fb); }
 .svc-icon { font-size: 1.8rem; flex-shrink: 0; }
-.svc-info h3 { font-size: 0.95rem; font-weight: 700; color: #0f2d40; margin: 0 0 0.2rem; }
-.svc-info p { font-size: 0.82rem; color: #64748b; margin: 0; }
-.svc-price { margin-left: auto; font-weight: 700; color: #1a4d6d; font-size: 0.95rem; white-space: nowrap; }
+.svc-info h3 { font-size: 0.95rem; font-weight: 700; color: var(--text-dark, #0f172a); margin: 0 0 0.2rem; }
+.svc-info p { font-size: 0.82rem; color: var(--text-light, #64748b); margin: 0; }
+.svc-price { margin-left: auto; font-weight: 700; color: var(--primary, #0f3f5e); font-size: 0.95rem; white-space: nowrap; }
 
 /* ── Number selectors ── */
 .selector-group { margin-bottom: 1.5rem; }
 .selector-label { font-weight: 600; color: #0f2d40; margin-bottom: 0.75rem; display: block; font-size: 0.95rem; }
 .num-selector { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.num-btn { width: 52px; height: 52px; border: 2px solid #e2e8f0; border-radius: 10px; background: #fff; font-size: 1rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s; }
-.num-btn:hover { border-color: #1a4d6d; color: #1a4d6d; }
-.num-btn.selected { border-color: #1a4d6d; background: #1a4d6d; color: #fff; }
+.num-btn { width: 52px; height: 52px; border: 2px solid var(--border, #e2e8f0); border-radius: 10px; background: #fff; font-size: 1rem; font-weight: 600; color: var(--text-light, #64748b); cursor: pointer; transition: all 0.2s; }
+.num-btn:hover { border-color: var(--primary, #0f3f5e); color: var(--primary, #0f3f5e); }
+.num-btn.selected { border-color: var(--primary, #0f3f5e); background: var(--primary, #0f3f5e); color: #fff; }
 
 /* ── Price preview ── */
-.price-preview { background: #f0f7ff; border-radius: 12px; padding: 1.1rem 1.25rem; margin-top: 1.75rem; display: flex; align-items: center; justify-content: space-between; }
-.preview-label { color: #64748b; font-size: 0.88rem; }
-.preview-amount { font-size: 1.9rem; font-weight: 800; color: #1a4d6d; }
+.price-preview { background: var(--bg-light, #f0f7fb); border-radius: 12px; padding: 1.1rem 1.25rem; margin-top: 1.75rem; display: flex; align-items: center; justify-content: space-between; }
+.preview-label { color: var(--text-light, #64748b); font-size: 0.88rem; }
+.preview-amount { font-size: 1.9rem; font-weight: 800; color: var(--primary, #0f3f5e); }
 
 /* ── Date picker ── */
 .date-picker-wrap { margin-top: 0.5rem; }
-.date-picker-wrap input[type=date] { width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1.05rem; color: #0f2d40; background: #fff; box-sizing: border-box; }
-.date-picker-wrap input[type=date]:focus { outline: none; border-color: #1a4d6d; }
+.date-picker-wrap input[type=date] { width: 100%; padding: 0.85rem 1rem; border: 2px solid var(--border, #e2e8f0); border-radius: 12px; font-size: 1.05rem; color: var(--text-dark, #0f172a); background: #fff; box-sizing: border-box; }
+.date-picker-wrap input[type=date]:focus { outline: none; border-color: var(--primary, #0f3f5e); }
 
 /* ── Form fields ── */
 .form-group { margin-bottom: 1.1rem; }
-.form-group label { display: block; font-weight: 600; color: #0f2d40; margin-bottom: 0.35rem; font-size: 0.88rem; }
-.form-group input { width: 100%; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; color: #0f2d40; transition: border-color 0.2s; box-sizing: border-box; }
-.form-group input:focus { outline: none; border-color: #1a4d6d; }
+.form-group label { display: block; font-weight: 600; color: var(--text-dark, #0f172a); margin-bottom: 0.35rem; font-size: 0.88rem; }
+.form-group input { width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border, #e2e8f0); border-radius: 10px; font-size: 0.95rem; color: var(--text-dark, #0f172a); transition: border-color 0.2s; box-sizing: border-box; }
+.form-group input:focus { outline: none; border-color: var(--primary, #0f3f5e); }
 .field-error { color: #ef4444; font-size: 0.78rem; margin-top: 0.2rem; display: block; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
@@ -72,17 +72,17 @@ WIZARD_CSS = """
 .review-row:last-child { border-bottom: none; }
 .r-label { color: #64748b; font-size: 0.88rem; }
 .r-value { font-weight: 600; color: #0f2d40; font-size: 0.88rem; }
-.total-row { background: #f0f7ff; border-radius: 12px; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; }
-.total-label { font-weight: 700; color: #0f2d40; }
-.total-amount { font-size: 1.6rem; font-weight: 800; color: #1a4d6d; }
+.total-row { background: var(--bg-light, #f0f7fb); border-radius: 12px; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; }
+.total-label { font-weight: 700; color: var(--text-dark, #0f172a); }
+.total-amount { font-size: 1.6rem; font-weight: 800; color: var(--primary, #0f3f5e); }
 
 /* ── Nav buttons ── */
 .wizard-nav { display: flex; gap: 0.75rem; margin-top: 2rem; }
-.btn-back { background: none; border: 2px solid #e2e8f0; color: #64748b; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.95rem; }
-.btn-back:hover { border-color: #94a3b8; color: #475569; }
-.btn-next { background: #1a4d6d; color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.95rem; flex: 1; }
-.btn-next:hover { background: #15405c; }
-.btn-submit { background: #16a34a; color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.95rem; flex: 1; }
+.btn-back { background: none; border: 2px solid var(--border, #e2e8f0); color: var(--text-light, #64748b); padding: 0.75rem 1.25rem; border-radius: 9999px; font-weight: 600; cursor: pointer; font-size: 0.95rem; }
+.btn-back:hover { border-color: var(--text-light, #94a3b8); color: var(--text-light, #475569); }
+.btn-next { background: var(--primary, #0f3f5e); color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 9999px; font-weight: 700; cursor: pointer; font-size: 0.95rem; flex: 1; }
+.btn-next:hover { background: var(--primary-light, #1e628f); }
+.btn-submit { background: var(--accent, #1e9a68); color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 9999px; font-weight: 700; cursor: pointer; font-size: 0.95rem; flex: 1; }
 .btn-submit:hover { background: #15803d; }
 
 /* ── Error banner ── */
@@ -93,8 +93,8 @@ WIZARD_CSS = """
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
-    .booking-page { padding: 1rem 0 5rem; }
-    .wizard-container { padding: 0 1rem; }
+    .booking-page { padding: 0 0 5rem; }
+    .wizard-container { margin: 1rem auto 0; padding: 0 1rem; }
     .wizard-card { padding: 1.25rem 1rem; border-radius: 12px; }
 
     /* Progress: hide labels, shrink circles */
@@ -289,15 +289,15 @@ def booking_form_page(errors: dict = {}):
             Style(WIZARD_CSS),
         ),
         Body(
-            Nav(
-                Div(
-                    A("Harbour Clean Co.", href="/", cls="logo"),
-                    A("← Back to Home", href="/", cls="back-home-link"),
-                    cls="nav-container",
-                ),
-                cls="navbar",
-            ),
             Main(
+                Nav(
+                    Div(
+                        A("Harbour Clean Co.", href="/", cls="logo"),
+                        A("← Back to Home", href="/", cls="back-home-link"),
+                        cls="nav-container",
+                    ),
+                    cls="navbar",
+                ),
                 Div(
                     # Progress bar
                     Div(
@@ -494,6 +494,25 @@ def booking_form_page(errors: dict = {}):
                 ),
                 cls="booking-page",
             ),
+            Div(
+                Div(
+                    Div(
+                        Span('✨ New Customer Offer: ', cls='banner-badge'),
+                        Span('Get 15% off your first deep clean this month with code '),
+                        Span('SPRING15', cls='banner-code'),
+                        A('Book Now →', href='/?#quote', cls='banner-link'),
+                        
+                        Span('✨ New Customer Offer: ', cls='banner-badge', style='margin-left: 2rem;'),
+                        Span('Get 15% off your first deep clean this month with code '),
+                        Span('SPRING15', cls='banner-code'),
+                        A('Book Now →', href='/?#quote', cls='banner-link'),
+                        cls='marquee-inner'
+                    ),
+                    cls='banner-content marquee'
+                ),
+                cls='announcement-banner',
+                style='position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000;'
+            ),
             Script(WIZARD_JS),
         ),
         lang="en",
@@ -510,8 +529,8 @@ def booking_confirmation_page(booking):
             Title("Booking Confirmed – Harbour Clean Co."),
             Link(rel="stylesheet", href="/css/styles.css"),
             Style("""
-                .confirmation-page { min-height: 100vh; background: #f8f9fb; padding: 2rem 0 5rem; }
-                .confirmation-card { background: #fff; border-radius: 16px; padding: 2.5rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); max-width: 560px; margin: 0 auto; text-align: center; }
+                .confirmation-page { min-height: 100vh; background: #f8f9fb; padding: 0 0 5rem; }
+                .confirmation-card { background: #fff; border-radius: 16px; padding: 2.5rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); max-width: 560px; margin: 2rem auto 0; text-align: center; }
                 .success-icon { width: 64px; height: 64px; background: #dcfce7; border-radius: 50%; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
                 .confirmation-card h1 { font-size: 1.6rem; color: #0f2d40; margin: 0 0 0.5rem; }
                 .confirmation-card > p { color: #64748b; margin: 0 0 2rem; }
@@ -526,11 +545,11 @@ def booking_confirmation_page(booking):
             """),
         ),
         Body(
-            Nav(
-                Div(A("Harbour Clean Co.", href="/", cls="logo"), cls="nav-container"),
-                cls="navbar",
-            ),
             Main(
+                Nav(
+                    Div(A("Harbour Clean Co.", href="/", cls="logo"), cls="nav-container"),
+                    cls="navbar",
+                ),
                 Div(
                     Div(
                         Div("✓", cls="success-icon"),
@@ -556,6 +575,25 @@ def booking_confirmation_page(booking):
                     cls="container",
                 ),
                 cls="confirmation-page",
+            ),
+            Div(
+                Div(
+                    Div(
+                        Span('✨ New Customer Offer: ', cls='banner-badge'),
+                        Span('Get 15% off your first deep clean this month with code '),
+                        Span('SPRING15', cls='banner-code'),
+                        A('Book Now →', href='/?#quote', cls='banner-link'),
+                        
+                        Span('✨ New Customer Offer: ', cls='banner-badge', style='margin-left: 2rem;'),
+                        Span('Get 15% off your first deep clean this month with code '),
+                        Span('SPRING15', cls='banner-code'),
+                        A('Book Now →', href='/?#quote', cls='banner-link'),
+                        cls='marquee-inner'
+                    ),
+                    cls='banner-content marquee'
+                ),
+                cls='announcement-banner',
+                style='position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000;'
             ),
         ),
         lang="en",
@@ -602,14 +640,14 @@ async def get_booking_confirmation(request: Request):
 
 
 LOOKUP_CSS = """
-.lookup-page { min-height: 100vh; background: #f8f9fb; padding: 2rem 0 5rem; }
-.lookup-card { background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); max-width: 540px; margin: 0 auto; }
+.lookup-page { min-height: 100vh; background: #f8f9fb; padding: 0 0 5rem; }
+.lookup-card { background: #fff; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); max-width: 540px; margin: 2rem auto 0; }
 .lookup-card h1 { font-size: 1.4rem; font-weight: 700; color: #0f2d40; margin: 0 0 0.4rem; }
 .lookup-card > p { color: #64748b; font-size: 0.92rem; margin: 0 0 1.75rem; }
-.lookup-input { width: 100%; padding: 0.85rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; color: #0f2d40; box-sizing: border-box; margin-bottom: 1rem; }
-.lookup-input:focus { outline: none; border-color: #1a4d6d; }
-.lookup-btn { width: 100%; background: #1a4d6d; color: #fff; border: none; padding: 0.85rem; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-.lookup-btn:hover { background: #15405c; }
+.lookup-input { width: 100%; padding: 0.85rem 1rem; border: 2px solid var(--border, #e2e8f0); border-radius: 10px; font-size: 1rem; color: var(--text-dark, #0f172a); box-sizing: border-box; margin-bottom: 1rem; }
+.lookup-input:focus { outline: none; border-color: var(--primary, #0f3f5e); }
+.lookup-btn { width: 100%; background: var(--primary, #0f3f5e); color: #fff; border: none; padding: 0.85rem; border-radius: 9999px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+.lookup-btn:hover { background: var(--primary-light, #1e628f); }
 .no-bookings { text-align: center; color: #64748b; padding: 2rem 0; font-size: 0.95rem; }
 .booking-card { border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
 .booking-card-header { background: #f8f9fb; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; }
@@ -623,9 +661,9 @@ LOOKUP_CSS = """
 .status-flagged_for_review { background: #fef3c7; color: #92400e; }
 .booking-card-body { padding: 0.75rem 1.25rem; }
 .booking-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-.booking-meta span { font-size: 0.85rem; color: #64748b; }
-.booking-meta strong { color: #0f2d40; }
-.view-link { display: block; text-align: right; font-size: 0.82rem; color: #1a4d6d; font-weight: 600; text-decoration: none; padding: 0.5rem 1.25rem 0.75rem; }
+.booking-meta span { font-size: 0.85rem; color: var(--text-light, #64748b); }
+.booking-meta strong { color: var(--text-dark, #0f172a); }
+.view-link { display: block; text-align: right; font-size: 0.82rem; color: var(--primary, #0f3f5e); font-weight: 600; text-decoration: none; padding: 0.5rem 1.25rem 0.75rem; }
 @media (max-width: 600px) {
     .lookup-card { padding: 1.25rem 1rem; }
     .booking-card-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
@@ -684,15 +722,15 @@ def lookup_page(bookings=None, searched=False, email=""):
             Style(LOOKUP_CSS),
         ),
         Body(
-            Nav(
-                Div(
-                    A("Harbour Clean Co.", href="/", cls="logo"),
-                    A("← Home", href="/", cls="back-home-link"),
-                    cls="nav-container",
-                ),
-                cls="navbar",
-            ),
             Main(
+                Nav(
+                    Div(
+                        A("Harbour Clean Co.", href="/", cls="logo"),
+                        A("← Home", href="/", cls="back-home-link"),
+                        cls="nav-container",
+                    ),
+                    cls="navbar",
+                ),
                 Div(
                     Div(
                         H1("Check Your Booking"),
@@ -710,6 +748,25 @@ def lookup_page(bookings=None, searched=False, email=""):
                     cls="container",
                 ),
                 cls="lookup-page",
+            ),
+            Div(
+                Div(
+                    Div(
+                        Span('✨ New Customer Offer: ', cls='banner-badge'),
+                        Span('Get 15% off your first deep clean this month with code '),
+                        Span('SPRING15', cls='banner-code'),
+                        A('Book Now →', href='/?#quote', cls='banner-link'),
+                        
+                        Span('✨ New Customer Offer: ', cls='banner-badge', style='margin-left: 2rem;'),
+                        Span('Get 15% off your first deep clean this month with code '),
+                        Span('SPRING15', cls='banner-code'),
+                        A('Book Now →', href='/?#quote', cls='banner-link'),
+                        cls='marquee-inner'
+                    ),
+                    cls='banner-content marquee'
+                ),
+                cls='announcement-banner',
+                style='position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000;'
             ),
         ),
         lang="en",

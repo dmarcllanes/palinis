@@ -311,6 +311,7 @@ section h2::after {
 
 /* ─── Mobile Nav ─── */
 @media (max-width: 768px) {
+
     /* On mobile: keep pill shape, just tighten the margins */
     .navbar {
         width: calc(100% - 24px);
@@ -623,7 +624,7 @@ section h2::after {
 
 @media (max-width: 480px) {
     .hero {
-        padding: 40px 20px 60px;
+        padding: calc(var(--nav-height) + 40px) 20px 60px;
     }
 
     .hero-buttons {
@@ -1690,6 +1691,7 @@ section h2::after {
 }
 
 @media (max-width: 768px) {
+
     /* Mobile nav is still floating pill — keep pull-up, just tighter */
     .hero {
         margin-top: calc(-1 * (var(--nav-height) + 16px));
