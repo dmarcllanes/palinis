@@ -1,0 +1,17 @@
+import hashlib
+import secrets
+
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100_000)
+    return f"{salt}:{key.hex()}"
+
+
+def verify_password(password: str, stored: str) -> bool:
+    try:
+        salt, key_hex = stored.split(":", 1)
+        key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100_000)
+        return secrets.compare_digest(key.hex(), key_hex)
+    except Exception:
+        return False

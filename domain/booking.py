@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from decimal import Decimal
-from datetime import date, datetime
+from datetime import date, datetime, time
 from uuid import UUID
 from domain.enums import BookingStatus, ServiceType
 
@@ -12,6 +12,7 @@ class CreateBookingRequest(BaseModel):
     address: str
     postcode: str
     service_date: date
+    service_time: time
     service_type: ServiceType
     bedrooms: int
     bathrooms: int
@@ -39,9 +40,11 @@ class Booking(BaseModel):
     address: str
     postcode: str
     service_date: date
+    service_time: time | None = None
     service_type: ServiceType
     bedrooms: int
     bathrooms: int
     total_price: Decimal
     status: BookingStatus
+    cleaner_id: UUID | None = None
     created_at: datetime

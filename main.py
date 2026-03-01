@@ -3,8 +3,10 @@ from fasthtml.common import *
 from starlette.responses import FileResponse
 from starlette.middleware.sessions import SessionMiddleware
 from app.routes.marketing import marketing_page
-from app.routes.booking import get_booking_form, post_booking_form, get_booking_confirmation, get_lookup, post_lookup
-from app.routes.admin import get_admin_login, post_admin_login, get_admin_dashboard, post_update_status, post_admin_logout
+from app.routes.booking import get_booking_form, post_booking_form, get_booking_confirmation, get_lookup, post_lookup, get_available_slots
+from app.routes.admin import get_admin_login, post_admin_login, get_admin_dashboard, post_update_status, post_assign_cleaner, post_admin_logout
+from app.routes.admin_cleaners import get_admin_cleaners, post_admin_add_cleaner, post_admin_toggle_cleaner, post_admin_delete_cleaner
+from app.routes.cleaners import get_cleaner_login, post_cleaner_login, get_cleaner_dashboard, post_cleaner_logout
 from repositories import db
 from config import APP_SECRET
 
@@ -38,6 +40,11 @@ async def get(request):
 @rt("/book", methods=["POST"])
 async def post(request):
     return await post_booking_form(request)
+
+
+@rt("/book/slots")
+async def get(request):
+    return await get_available_slots(request)
 
 
 @rt("/booking/lookup")
@@ -76,9 +83,56 @@ async def post(request):
     return await post_update_status(request)
 
 
+@rt("/admin/bookings/{id}/assign", methods=["POST"])
+async def post(request):
+    return await post_assign_cleaner(request)
+
+
 @rt("/admin/logout", methods=["POST"])
 async def post(request):
     return await post_admin_logout(request)
+
+
+# ── Admin: Cleaners management ──
+@rt("/admin/cleaners")
+async def get(request):
+    return await get_admin_cleaners(request)
+
+
+@rt("/admin/cleaners/add", methods=["POST"])
+async def post(request):
+    return await post_admin_add_cleaner(request)
+
+
+@rt("/admin/cleaners/{id}/toggle", methods=["POST"])
+async def post(request):
+    return await post_admin_toggle_cleaner(request)
+
+
+@rt("/admin/cleaners/{id}/delete", methods=["POST"])
+async def post(request):
+    return await post_admin_delete_cleaner(request)
+
+
+# ── Cleaner portal ──
+@rt("/cleaners")
+async def get(request):
+    return await get_cleaner_login(request)
+
+
+@rt("/cleaners/login", methods=["POST"])
+async def post(request):
+    return await post_cleaner_login(request)
+
+
+@rt("/cleaners/dashboard")
+async def get(request):
+    return await get_cleaner_dashboard(request)
+
+
+@rt("/cleaners/logout", methods=["POST"])
+async def post(request):
+    return await post_cleaner_logout(request)
 
 
 if __name__ == "__main__":

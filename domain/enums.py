@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class BookingStatus(str, Enum):
-    pending_payment = "pending_payment"
+    pending_confirmation = "pending_confirmation"
     confirmed = "confirmed"
     assigned = "assigned"
     in_progress = "in_progress"

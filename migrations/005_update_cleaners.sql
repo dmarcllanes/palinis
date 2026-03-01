@@ -1,0 +1,4 @@
+ALTER TABLE cleaners
+    ADD COLUMN IF NOT EXISTS username      VARCHAR(100) UNIQUE,
+    ADD COLUMN IF NOT EXISTS password_hash TEXT,
+    ADD COLUMN IF NOT EXISTS phone         VARCHAR(20);

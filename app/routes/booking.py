@@ -1,10 +1,112 @@
 from fasthtml.common import *
 from starlette.requests import Request
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, JSONResponse
 from pydantic import ValidationError
 from domain.booking import CreateBookingRequest
-from services import booking_service
+from services import booking_service, availability_service
 from repositories.db import get_pool
+from components.admin_ui import CUSTOMER_STATUS_LABELS
+from datetime import date as date_type
+
+BOOKING_NAV_CSS = """
+.book-nav {
+    background: #fff;
+    border-bottom: 1px solid #e8edf3;
+    box-shadow: 0 1px 16px rgba(15,63,94,0.07);
+    padding: 0 2rem;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.book-nav::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0f3f5e 0%, #1e9a68 100%);
+}
+.book-nav-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.book-nav-logo {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f3f5e;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+.book-nav-dot {
+    width: 8px;
+    height: 8px;
+    background: #1e9a68;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.book-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.book-nav-link {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.book-nav-link:hover { color: #0f3f5e; }
+.book-nav-pill {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0f3f5e;
+    border: 1.5px solid #0f3f5e;
+    padding: 0.38rem 1rem;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.book-nav-pill:hover { background: #0f3f5e; color: #fff; }
+@media (max-width: 600px) {
+    .book-nav { padding: 0 1rem; height: 54px; }
+    .book-nav-logo { font-size: 0.95rem; }
+    .book-nav-link { display: none; }
+    .book-nav-pill { font-size: 0.78rem; padding: 0.32rem 0.8rem; }
+}
+"""
+
+
+def booking_nav(right_links=None):
+    """Modern flat navbar for booking-flow pages."""
+    if right_links is None:
+        right_links = [
+            A("Track Booking", href="/booking/lookup", cls="book-nav-link"),
+            A("Home", href="/", cls="book-nav-pill"),
+        ]
+    return Nav(
+        Div(
+            A(
+                Span(cls="book-nav-dot"),
+                "Harbour Clean Co.",
+                href="/",
+                cls="book-nav-logo",
+            ),
+            Div(*right_links, cls="book-nav-right"),
+            cls="book-nav-inner",
+        ),
+        cls="book-nav",
+    )
+
 
 WIZARD_CSS = """
 /* ── Base ── */
@@ -91,6 +193,17 @@ WIZARD_CSS = """
 .back-home-link { font-size: 0.88rem; color: #64748b; text-decoration: none; font-weight: 500; margin-left: auto; }
 .back-home-link:hover { color: #1a4d6d; }
 
+/* ── Time slots ── */
+.time-slots-wrap { margin-top: 1.25rem; }
+.time-slots-label { font-weight: 600; color: #0f2d40; margin-bottom: 0.75rem; display: block; font-size: 0.95rem; }
+.time-slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.6rem; }
+.time-slot-btn { border: 2px solid var(--border, #e2e8f0); border-radius: 10px; padding: 0.65rem 0.5rem; background: #fff; font-size: 0.9rem; font-weight: 600; color: var(--text-dark, #0f172a); cursor: pointer; text-align: center; transition: all 0.2s; }
+.time-slot-btn:hover:not(.slot-full) { border-color: var(--primary, #0f3f5e); color: var(--primary, #0f3f5e); }
+.time-slot-btn.selected { border-color: var(--primary, #0f3f5e); background: var(--primary, #0f3f5e); color: #fff; }
+.time-slot-btn.slot-full { border-color: #e2e8f0; background: #f8f9fb; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; }
+.slots-loading { color: #64748b; font-size: 0.9rem; padding: 0.5rem 0; }
+.slots-empty { color: #94a3b8; font-size: 0.88rem; padding: 0.5rem 0; }
+
 /* ── Mobile ── */
 @media (max-width: 600px) {
     .booking-page { padding: 0 0 5rem; }
@@ -148,7 +261,7 @@ const BASE_PRICES = {
 };
 const BATH_MULT = {1: 1.0, 2: 1.15, 3: 1.3, 4: 1.45};
 
-const state = { service_type: '', bedrooms: 2, bathrooms: 1, service_date: '' };
+const state = { service_type: '', bedrooms: 2, bathrooms: 1, service_date: '', service_time: '' };
 let currentStep = 1;
 
 function calcPrice() {
@@ -193,12 +306,66 @@ function selectNum(type, val) {
     if (el) el.textContent = fmt(calcPrice());
 }
 
+function selectTimeSlot(value, label, btn) {
+    if (btn.classList.contains('slot-full')) return;
+    state.service_time = value;
+    document.getElementById('input-service-time').value = value;
+    document.querySelectorAll('.time-slot-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
+
+async function loadTimeSlots(dateStr) {
+    const wrap = document.getElementById('time-slots-container');
+    if (!wrap) return;
+    wrap.innerHTML = '<p class="slots-loading">Checking availability…</p>';
+    state.service_time = '';
+    document.getElementById('input-service-time').value = '';
+
+    try {
+        const resp = await fetch('/book/slots?date=' + encodeURIComponent(dateStr));
+        const data = await resp.json();
+        if (!data.slots || data.slots.length === 0) {
+            wrap.innerHTML = '<p class="slots-empty">No availability on this date. Please choose another day.</p>';
+            return;
+        }
+        const allSlots = [
+            {value: '08:00:00', label: '8:00 AM'},
+            {value: '10:00:00', label: '10:00 AM'},
+            {value: '12:00:00', label: '12:00 PM'},
+            {value: '14:00:00', label: '2:00 PM'},
+            {value: '16:00:00', label: '4:00 PM'},
+        ];
+        const available = new Set(data.slots);
+        const grid = document.createElement('div');
+        grid.className = 'time-slots-grid';
+        allSlots.forEach(s => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'time-slot-btn' + (available.has(s.value) ? '' : ' slot-full');
+            btn.textContent = s.label + (available.has(s.value) ? '' : ' ✕');
+            if (available.has(s.value)) {
+                btn.onclick = () => selectTimeSlot(s.value, s.label, btn);
+            }
+            grid.appendChild(btn);
+        });
+        wrap.innerHTML = '';
+        wrap.appendChild(grid);
+    } catch(e) {
+        wrap.innerHTML = '<p class="slots-empty">Could not load availability. Please try again.</p>';
+    }
+}
+
 function populateReview() {
     const labels = { regular: 'Regular Cleaning', deep: 'Deep Cleaning', end_of_lease: 'End of Lease' };
+    const timeLabels = {
+        '08:00:00': '8:00 AM', '10:00:00': '10:00 AM', '12:00:00': '12:00 PM',
+        '14:00:00': '2:00 PM', '16:00:00': '4:00 PM'
+    };
     const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
     set('review-service',   labels[state.service_type] || '');
     set('review-property',  state.bedrooms + ' bed · ' + state.bathrooms + ' bath');
-    set('review-date',      document.getElementById('input-service-date').value);
+    const timeLabel = timeLabels[state.service_time] || state.service_time;
+    set('review-date',      document.getElementById('input-service-date').value + ' at ' + timeLabel);
     set('review-name',      document.getElementById('f-name').value);
     set('review-email',     document.getElementById('f-email').value);
     set('review-phone',     document.getElementById('f-phone').value);
@@ -234,6 +401,7 @@ function goNext() {
         const today = new Date(); today.setHours(0,0,0,0);
         if (picked < today) { alert('Please select a future date.'); return; }
         state.service_date = d;
+        if (!state.service_time) { alert('Please select a time slot.'); return; }
     }
     if (currentStep === 4) {
         clearFieldErrors();
@@ -270,6 +438,14 @@ window.addEventListener('DOMContentLoaded', () => {
     showStep(1);
     selectNum('bedrooms', 2);
     selectNum('bathrooms', 1);
+
+    const dateInput = document.getElementById('input-service-date');
+    if (dateInput) {
+        dateInput.addEventListener('change', () => {
+            const d = dateInput.value;
+            if (d) loadTimeSlots(d);
+        });
+    }
 });
 """
 
@@ -286,18 +462,12 @@ def booking_form_page(errors: dict = {}):
             Meta(name="viewport", content="width=device-width, initial-scale=1.0, viewport-fit=cover"),
             Title("Book a Cleaning – Harbour Clean Co."),
             Link(rel="stylesheet", href="/css/styles.css"),
+            Style(BOOKING_NAV_CSS),
             Style(WIZARD_CSS),
         ),
         Body(
             Main(
-                Nav(
-                    Div(
-                        A("Harbour Clean Co.", href="/", cls="logo"),
-                        A("← Back to Home", href="/", cls="back-home-link"),
-                        cls="nav-container",
-                    ),
-                    cls="navbar",
-                ),
+                booking_nav(),
                 Div(
                     # Progress bar
                     Div(
@@ -316,9 +486,10 @@ def booking_form_page(errors: dict = {}):
                     # Form
                     Form(
                         # Hidden inputs populated by JS
-                        Input(type="hidden", name="service_type", id="input-service-type"),
-                        Input(type="hidden", name="bedrooms",     id="input-bedrooms", value="2"),
-                        Input(type="hidden", name="bathrooms",    id="input-bathrooms", value="1"),
+                        Input(type="hidden", name="service_type",  id="input-service-type"),
+                        Input(type="hidden", name="bedrooms",      id="input-bedrooms", value="2"),
+                        Input(type="hidden", name="bathrooms",     id="input-bathrooms", value="1"),
+                        Input(type="hidden", name="service_time",  id="input-service-time"),
 
                         # ── Step 1: Service Type ──
                         Div(
@@ -393,14 +564,22 @@ def booking_form_page(errors: dict = {}):
                             cls="wizard-card wizard-step", id="step-2",
                         ),
 
-                        # ── Step 3: Date ──
+                        # ── Step 3: Date & Time ──
                         Div(
                             Div(
-                                H2("Pick a date", cls="step-title"),
-                                P("Choose your preferred cleaning date.", cls="step-subtitle"),
+                                H2("Pick a date & time", cls="step-title"),
+                                P("Choose your preferred cleaning date and available time slot.", cls="step-subtitle"),
                                 Div(
                                     Input(type="date", id="input-service-date", name="service_date"),
                                     cls="date-picker-wrap",
+                                ),
+                                Div(
+                                    Span("Available time slots", cls="time-slots-label"),
+                                    Div(
+                                        P("Select a date above to see available times.", cls="slots-empty"),
+                                        id="time-slots-container",
+                                    ),
+                                    cls="time-slots-wrap",
                                 ),
                                 Div(
                                     Button("← Back", cls="btn-back", type="button", onclick="goBack()"),
@@ -461,7 +640,7 @@ def booking_form_page(errors: dict = {}):
                                     P("Service", cls="review-section-title"),
                                     Div(Span("Type", cls="r-label"), Span("—", cls="r-value", id="review-service"), cls="review-row"),
                                     Div(Span("Property", cls="r-label"), Span("—", cls="r-value", id="review-property"), cls="review-row"),
-                                    Div(Span("Date", cls="r-label"), Span("—", cls="r-value", id="review-date"), cls="review-row"),
+                                    Div(Span("Date & Time", cls="r-label"), Span("—", cls="r-value", id="review-date"), cls="review-row"),
                                     cls="review-section",
                                 ),
                                 Div(
@@ -522,12 +701,14 @@ def booking_form_page(errors: dict = {}):
 def booking_confirmation_page(booking):
     service_label = booking.service_type.value.replace("_", " ").title()
     status_label = booking.status.value.replace("_", " ").title()
+    time_label = booking.service_time.strftime("%-I:%M %p") if booking.service_time else "—"
     return Html(
         Head(
             Meta(charset="UTF-8"),
             Meta(name="viewport", content="width=device-width, initial-scale=1.0, viewport-fit=cover"),
             Title("Booking Confirmed – Harbour Clean Co."),
             Link(rel="stylesheet", href="/css/styles.css"),
+            Style(BOOKING_NAV_CSS),
             Style("""
                 .confirmation-page { min-height: 100vh; background: #f8f9fb; padding: 0 0 5rem; }
                 .confirmation-card { background: #fff; border-radius: 16px; padding: 2.5rem; box-shadow: 0 2px 20px rgba(0,0,0,0.06); max-width: 560px; margin: 2rem auto 0; text-align: center; }
@@ -546,10 +727,10 @@ def booking_confirmation_page(booking):
         ),
         Body(
             Main(
-                Nav(
-                    Div(A("Harbour Clean Co.", href="/", cls="logo"), cls="nav-container"),
-                    cls="navbar",
-                ),
+                booking_nav(right_links=[
+                    A("Track Booking", href="/booking/lookup", cls="book-nav-link"),
+                    A("Book Again", href="/book", cls="book-nav-pill"),
+                ]),
                 Div(
                     Div(
                         Div("✓", cls="success-icon"),
@@ -560,6 +741,7 @@ def booking_confirmation_page(booking):
                             Div(Span("Name", cls="detail-label"), Span(booking.customer_name, cls="detail-value"), cls="detail-row"),
                             Div(Span("Service", cls="detail-label"), Span(service_label, cls="detail-value"), cls="detail-row"),
                             Div(Span("Date", cls="detail-label"), Span(str(booking.service_date), cls="detail-value"), cls="detail-row"),
+                            Div(Span("Time", cls="detail-label"), Span(time_label, cls="detail-value"), cls="detail-row"),
                             Div(Span("Total", cls="detail-label"), Span(f"${booking.total_price}", cls="detail-value price-highlight"), cls="detail-row"),
                             Div(Span("Status", cls="detail-label"), Span(status_label, cls="detail-value status-badge"), cls="detail-row"),
                             cls="booking-details",
@@ -615,6 +797,7 @@ async def post_booking_form(request: Request):
             address=form.get("address"),
             postcode=form.get("postcode"),
             service_date=form.get("service_date"),
+            service_time=form.get("service_time"),
             service_type=form.get("service_type"),
             bedrooms=form.get("bedrooms"),
             bathrooms=form.get("bathrooms"),
@@ -625,7 +808,20 @@ async def post_booking_form(request: Request):
         errors = {err["loc"][0]: err["msg"] for err in e.errors()}
         return booking_form_page(errors=errors)
     except ValueError as e:
-        return booking_form_page(errors={"postcode": str(e)})
+        return booking_form_page(errors={"general": str(e)})
+
+
+async def get_available_slots(request: Request):
+    """JSON endpoint: returns available time slot strings for a given date."""
+    date_str = request.query_params.get("date", "")
+    try:
+        service_date = date_type.fromisoformat(date_str)
+    except ValueError:
+        return JSONResponse({"slots": []})
+    pool = get_pool()
+    slots = await availability_service.get_available_slots(pool, service_date)
+    # Format as HH:MM:SS strings to match what asyncpg returns
+    return JSONResponse({"slots": [f"{s.hour:02d}:{s.minute:02d}:00" for s in slots]})
 
 
 async def get_booking_confirmation(request: Request):
@@ -653,7 +849,7 @@ LOOKUP_CSS = """
 .booking-card-header { background: #f8f9fb; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; }
 .booking-card-header .svc-name { font-weight: 700; color: #0f2d40; font-size: 0.95rem; }
 .status-pill { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-.status-pending_payment { background: #fef9c3; color: #854d0e; }
+.status-pending_confirmation { background: #fef9c3; color: #854d0e; }
 .status-confirmed { background: #dcfce7; color: #166534; }
 .status-assigned { background: #dbeafe; color: #1e40af; }
 .status-completed { background: #f0fdf4; color: #166534; }
@@ -672,14 +868,6 @@ LOOKUP_CSS = """
 
 
 def lookup_page(bookings=None, searched=False, email=""):
-    STATUS_LABELS = {
-        "pending_payment": "Pending Payment",
-        "confirmed": "Confirmed",
-        "assigned": "Cleaner Assigned",
-        "completed": "Completed",
-        "cancelled": "Cancelled",
-        "flagged_for_review": "Under Review",
-    }
 
     results = None
     if searched:
@@ -690,7 +878,7 @@ def lookup_page(bookings=None, searched=False, email=""):
             for b in bookings:
                 svc = b.service_type.value.replace("_", " ").title()
                 status_val = b.status.value
-                status_text = STATUS_LABELS.get(status_val, status_val)
+                status_text = CUSTOMER_STATUS_LABELS.get(status_val, status_val)
                 cards.append(
                     Div(
                         Div(
@@ -719,18 +907,15 @@ def lookup_page(bookings=None, searched=False, email=""):
             Meta(name="viewport", content="width=device-width, initial-scale=1.0, viewport-fit=cover"),
             Title("Check Booking Status – Harbour Clean Co."),
             Link(rel="stylesheet", href="/css/styles.css"),
+            Style(BOOKING_NAV_CSS),
             Style(LOOKUP_CSS),
         ),
         Body(
             Main(
-                Nav(
-                    Div(
-                        A("Harbour Clean Co.", href="/", cls="logo"),
-                        A("← Home", href="/", cls="back-home-link"),
-                        cls="nav-container",
-                    ),
-                    cls="navbar",
-                ),
+                booking_nav(right_links=[
+                    A("Home", href="/", cls="book-nav-link"),
+                    A("Book a Cleaning", href="/book", cls="book-nav-pill"),
+                ]),
                 Div(
                     Div(
                         H1("Check Your Booking"),
